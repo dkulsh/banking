@@ -1,5 +1,6 @@
 package com.eltropy.banking.controller;
 
+import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.constants.UserTypes;
 import com.eltropy.banking.entity.User;
 import com.eltropy.banking.repository.UserRepository;
@@ -44,7 +45,7 @@ public class UserController {
     public ResponseEntity<Object> createAdmin(@RequestBody User user) {
 
         if (! userTypes.contains(user.getType())) {
-            logger.error(user.getType() + " is invalid", CLASS_NAME);
+            logger.error(ErrorConstants.IS_INVALID, user.getType());
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(user.getType() + " is invalid");
         }
         user.setPassword(bcryptEncoder.encode(user.getPassword()));

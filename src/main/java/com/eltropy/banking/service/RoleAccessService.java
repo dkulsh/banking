@@ -5,13 +5,11 @@ import com.eltropy.banking.entity.RoleAccess;
 import com.eltropy.banking.repository.RoleAccessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 
@@ -41,9 +39,7 @@ public class RoleAccessService {
                 .stream()
                 .collect(groupingBy(RoleAccess::getRole, mapping(RoleAccess::getAccess, Collectors.toList())));
 
-        synchronized (rolesToAccessMap) {
-            rolesToAccessMap = localRolesToAccessMap;
-        }
+        rolesToAccessMap = localRolesToAccessMap;
     }
 
     public Map<String, List<String>> getRolesToAccessMap() {

@@ -63,7 +63,7 @@ public class AccountController {
     private boolean validateInput(Account account) throws InvalidAccountTypeException {
 
         if (! accountTypes.contains(account.getType())) {
-            logger.info(account.getType() + " is not a valid account type", CLASS_NAME);
+            logger.info("{} is not a valid account type", account.getType());
             throw new InvalidAccountTypeException(account.getType() + " is not a valid account type");
         }
 
@@ -75,8 +75,7 @@ public class AccountController {
         Optional<Account> accountOptional = accountRepository.findById(id);
 
         if (!accountOptional.isPresent()) {
-            logger.info("No account found with id - " + id, CLASS_NAME);
-            logger.info("No account found with id - ", id);
+            logger.info("No account found with id - {}", id);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + id);
         }
 

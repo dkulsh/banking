@@ -1,6 +1,7 @@
 package com.eltropy.banking.controller;
 
 import com.eltropy.banking.constants.CustomerStatus;
+import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Customer;
 import com.eltropy.banking.repository.AccountRepository;
@@ -15,6 +16,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Optional;
+
+import static com.eltropy.banking.constants.ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID;
 
 @RestController
 @RequestMapping("/customer")
@@ -34,8 +37,8 @@ public class CustomerController {
         Optional<Customer> customerOptional = customerRepository.findById(id);
 
         if (!customerOptional.isPresent()) {
-            logger.info("No customer found with id - " + id, CLASS_NAME);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No customer found with id - " + id);
+            logger.info(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID, id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID_2 + id);
         }
 
         return ResponseEntity.ok(customerOptional.get());
@@ -59,8 +62,8 @@ public class CustomerController {
         Optional<Customer> customerOptional = customerRepository.findById(id);
 
         if (!customerOptional.isPresent()) {
-            logger.info("No customer found with id - " + id, CLASS_NAME);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No customer found with id - " + id);
+            logger.info(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID, id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID_2 + id);
         }
 
         customer.setCustomerId(id);
@@ -82,13 +85,13 @@ public class CustomerController {
         Optional<Account> accountOptional = accountRepository.findById(account.getAccountId());
 
         if (!customerOptional.isPresent()) {
-            logger.info("No customer found with id - " + id, CLASS_NAME);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No customer found with id - " + id);
+            logger.info(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID, id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID_2 + id);
         }
 
         if (!accountOptional.isPresent()) {
-            logger.info("No account found with id - " + account.getAccountId(), CLASS_NAME);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - "
+            logger.info(NO_ACCOUNT_FOUND_WITH_ID, account.getAccountId());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID1
                     + account.getAccountId());
         }
 
@@ -96,6 +99,7 @@ public class CustomerController {
         Account dbAccount = accountOptional.get();
         customer.getAccounts().add(dbAccount);
         Customer savedCustomer = customerRepository.save(customer);
+
 
         return ResponseEntity.ok(savedCustomer);
 

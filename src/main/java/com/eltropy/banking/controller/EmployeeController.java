@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.util.Optional;
 
@@ -43,7 +41,7 @@ public class EmployeeController {
         Optional<Employee> employeeOptional = employeeRepository.findById(id);
 
         if (!employeeOptional.isPresent()) {
-            logger.info("Employee not found with id = " + id, CLASS_NAME);
+            logger.info("Employee not found with id = {}", id);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee not found with id = " + id);
         }
 
@@ -51,7 +49,6 @@ public class EmployeeController {
         employee.setStatus(EmployeeStatus.DELETED.name());
         employeeRepository.save(employee);
 
-//        return ResponseEntity.accepted().build();
         return new ResponseEntity<>(id, HttpStatus.ACCEPTED);
 
     }

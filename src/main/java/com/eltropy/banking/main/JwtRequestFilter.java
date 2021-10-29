@@ -1,6 +1,6 @@
 package com.eltropy.banking.main;
 
-import com.eltropy.banking.controller.CustomerController;
+import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.service.JwtUserDetailsService;
 import com.eltropy.banking.util.JwtTokenUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,7 +24,7 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     public static final String CLASS_NAME = JwtRequestFilter.class.getName();
-    private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
+    private static final Logger loggerVar = LoggerFactory.getLogger(JwtRequestFilter.class);
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService;
@@ -47,12 +47,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtTokenUtil.getUsernameFromToken(jwtToken);
             } catch (IllegalArgumentException e) {
-                logger.error("JWT Token does not begin with Bearer String", CLASS_NAME);
+                loggerVar.error(ErrorConstants.NOT_BEGIN_WITH_BEARER_STRING, CLASS_NAME);
             } catch (ExpiredJwtException e) {
-                logger.error("JWT Token has expired", CLASS_NAME);
+                loggerVar.error(ErrorConstants.HAS_EXPIRED, CLASS_NAME);
             }
         } else {
-            logger.warn("JWT Token does not begin with Bearer String", CLASS_NAME);
+            loggerVar.warn(ErrorConstants.NOT_BEGIN_WITH_BEARER_STRING, CLASS_NAME);
         }
 
         // Once we get the token validate it.

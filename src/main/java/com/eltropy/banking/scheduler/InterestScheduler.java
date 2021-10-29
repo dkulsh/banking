@@ -1,6 +1,7 @@
 package com.eltropy.banking.scheduler;
 
 import com.eltropy.banking.constants.AccountStatus;
+import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.controller.AccountController;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.repository.AccountRepository;
@@ -32,7 +33,7 @@ public class InterestScheduler {
     @Scheduled(cron = "${interest.rate.calculation.cron:1 1 1 1 1 1}")
     public void addInterest() {
 
-        logger.info("Interest calculation trigerred", CLASS_NAME);
+        logger.info(ErrorConstants.INTEREST_CALCULATION_TRIGERRED, CLASS_NAME);
 
         List<Account> accountList = accountRepository.findAllByStatus(AccountStatus.ACTIVE.name());
         for (Account account: accountList) {
@@ -42,6 +43,6 @@ public class InterestScheduler {
             accountRepository.save(account);
         }
 
-        logger.info("Interest calculation completed", CLASS_NAME);
+        logger.info(ErrorConstants.INTEREST_CALCULATION_COMPLETED, CLASS_NAME);
     }
 }

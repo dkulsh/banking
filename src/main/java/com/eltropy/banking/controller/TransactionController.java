@@ -1,5 +1,6 @@
 package com.eltropy.banking.controller;
 
+import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.constants.TransactionType;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Transaction;
@@ -25,6 +26,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static com.eltropy.banking.constants.ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID;
+
 @RestController
 @RequestMapping("/transaction")
 public class TransactionController {
@@ -43,7 +46,7 @@ public class TransactionController {
         Optional<Account> accountOptional = accountRepository.findById(id);
 
         if (!accountOptional.isPresent()) {
-            logger.error("No account found with id - " + id, CLASS_NAME);
+            logger.error(NO_ACCOUNT_FOUND_WITH_ID, id);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + id);
         }
 
@@ -57,12 +60,12 @@ public class TransactionController {
         Optional<Account> toAccountOptional = accountRepository.findById(transferFunds.getToAccount());
 
         if (!fromAccountOptional.isPresent()) {
-            logger.error("No account found with id - " + transferFunds.getFromAccount(), CLASS_NAME);
+            logger.error(NO_ACCOUNT_FOUND_WITH_ID, transferFunds.getFromAccount());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + transferFunds.getFromAccount());
         }
 
         if (!toAccountOptional.isPresent()) {
-            logger.error("No account found with id - " + transferFunds.getFromAccount(), CLASS_NAME);
+            logger.error(NO_ACCOUNT_FOUND_WITH_ID, transferFunds.getFromAccount());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + transferFunds.getToAccount());
         }
 
@@ -70,7 +73,7 @@ public class TransactionController {
             List<Account> updatedAccounts = transfer(transferFunds.getAmount(), fromAccountOptional.get(), toAccountOptional.get());
             return ResponseEntity.ok(updatedAccounts);
         } else {
-            logger.info("Insufficient balance" + "::" + transferFunds.getFromAccount(), CLASS_NAME);
+            logger.info("Insufficient balance :: {}", transferFunds.getFromAccount());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient balance");
         }
     }
@@ -96,12 +99,9 @@ public class TransactionController {
                                                HttpServletResponse response) {
 
         List<Transaction> transactions = transactionalRepository.getTransactions(accountId, fromDate, toDate);
-//        response.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=statement.pdf");
 
         generatePdf(transactions, response);
 
-//        InputStream inputStream = new FileInputStream("/Users/deepkulshreshtha/Downloads/statement.pdf");
-//        return ResponseEntity.ok(transactions);
     }
 
     private void generatePdf(List<Transaction> transactions, HttpServletResponse response){
@@ -110,7 +110,6 @@ public class TransactionController {
 
         try {
 
-//            FileOutputStream fileOutputStream = new FileOutputStream(new File("/Users/deepkulshreshtha/Downloads/statement.pdf"));
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             PdfWriter.getInstance(document, byteArrayOutputStream);
 
@@ -136,7 +135,7 @@ public class TransactionController {
             inputStream.close();
 
         } catch (DocumentException | IOException e) {
-            logger.error("Exception while creating creating statement pdf :: " + e.getMessage(), CLASS_NAME);
+            logger.error(ErrorConstants.EXCEPTION_WHILE_CREATING_CREATING_STATEMENT_PDF, e.getMessage());
             e.printStackTrace();
         }
     }
