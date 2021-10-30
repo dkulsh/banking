@@ -1,8 +1,11 @@
 package com.eltropy.banking.controller;
 
 import com.eltropy.banking.constants.EmployeeStatus;
+import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.entity.Employee;
+import com.eltropy.banking.exceptions.EmployeeNotFoundException;
 import com.eltropy.banking.repository.EmployeeRepository;
+import com.eltropy.banking.service.EmployeeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +26,13 @@ public class EmployeeController {
     @Autowired
     EmployeeRepository employeeRepository;
 
+    @Autowired
+    EmployeeService employeeService;
+
     @PostMapping
     public ResponseEntity<Object> createEmployee(@RequestBody Employee employee) {
 
-        employee.setStatus(EmployeeStatus.ACTIVE.name());
-        Employee savedEmployee = employeeRepository.save(employee);
+        Employee savedEmployee = employeeService.createEmployee(employee);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedEmployee.getEmployeId()).toUri();
@@ -38,17 +43,12 @@ public class EmployeeController {
     @DeleteMapping("{id}")
     public ResponseEntity<Object> deleteEmployee(@PathVariable long id) {
 
-        Optional<Employee> employeeOptional = employeeRepository.findById(id);
-
-        if (!employeeOptional.isPresent()) {
-            logger.info("Employee not found with id = {}", id);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Employee not found with id = " + id);
+        try {
+            employeeService.deleteEmployee(id);
+        } catch (EmployeeNotFoundException e) {
+            logger.info(ErrorConstants.EMPLOYEE_NOT_FOUND_WITH_ID, id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-
-        Employee employee = employeeOptional.get();
-        employee.setStatus(EmployeeStatus.DELETED.name());
-        employeeRepository.save(employee);
-
         return new ResponseEntity<>(id, HttpStatus.ACCEPTED);
 
     }

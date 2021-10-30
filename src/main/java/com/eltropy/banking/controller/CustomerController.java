@@ -4,8 +4,11 @@ import com.eltropy.banking.constants.CustomerStatus;
 import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Customer;
+import com.eltropy.banking.exceptions.AccountNotFoundException;
+import com.eltropy.banking.exceptions.CustomerNotFounException;
 import com.eltropy.banking.repository.AccountRepository;
 import com.eltropy.banking.repository.CustomerRepository;
+import com.eltropy.banking.service.CustomerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,28 +33,32 @@ public class CustomerController {
     CustomerRepository customerRepository;
 
     @Autowired
+    CustomerService customerService;
+
+    @Autowired
     AccountRepository accountRepository;
 
     @GetMapping("{id}")
     public ResponseEntity<Object> retrieveCustomer(@PathVariable long id) {
-        Optional<Customer> customerOptional = customerRepository.findById(id);
 
-        if (!customerOptional.isPresent()) {
+        Customer customer = null;
+
+        try {
+            customer = customerService.getCustomer(id);
+        } catch (CustomerNotFounException e){
             logger.info(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID, id);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID_2 + id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
-        return ResponseEntity.ok(customerOptional.get());
+        return ResponseEntity.ok(customer);
     }
 
     @PostMapping
     public ResponseEntity<Object> createCustomer(@RequestBody Customer customer) {
 
-        customer.setStatus(CustomerStatus.ACTIVE.name());
-        Customer savedCustomer = customerRepository.save(customer);
-
+        Customer createdCustomer = customerService.createCustomer(customer);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(savedCustomer.getCustomerId()).toUri();
+                .buildAndExpand(createdCustomer.getCustomerId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
@@ -59,17 +66,16 @@ public class CustomerController {
     @PutMapping("{id}")
     public ResponseEntity<Object> updatePhoneDetails(@RequestBody Customer customer, @PathVariable long id) {
 
-        Optional<Customer> customerOptional = customerRepository.findById(id);
+        Customer savedCustomer = null;
 
-        if (!customerOptional.isPresent()) {
+        try {
+            savedCustomer = customerService.updateCustomer(customer, id);
+        } catch (CustomerNotFounException e) {
             logger.info(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID, id);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID_2 + id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
-        customer.setCustomerId(id);
-
-        Customer savedData = customerRepository.save(customer);
-        return ResponseEntity.ok(savedData);
+        return ResponseEntity.ok(savedCustomer);
     }
 
     @DeleteMapping("{id}")
@@ -81,25 +87,12 @@ public class CustomerController {
     @PostMapping("/link_account/{id}")
     public ResponseEntity<Object> linkAccount(@PathVariable long id, @RequestBody Account account) {
 
-        Optional<Customer> customerOptional = customerRepository.findById(id);
-        Optional<Account> accountOptional = accountRepository.findById(account.getAccountId());
-
-        if (!customerOptional.isPresent()) {
-            logger.info(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID, id);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID_2 + id);
+        Customer savedCustomer = null;
+        try {
+            savedCustomer = customerService.linkAccounts(id, account);
+        } catch (CustomerNotFounException | AccountNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-
-        if (!accountOptional.isPresent()) {
-            logger.info(NO_ACCOUNT_FOUND_WITH_ID, account.getAccountId());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID1
-                    + account.getAccountId());
-        }
-
-        Customer customer = customerOptional.get();
-        Account dbAccount = accountOptional.get();
-        customer.getAccounts().add(dbAccount);
-        Customer savedCustomer = customerRepository.save(customer);
-
 
         return ResponseEntity.ok(savedCustomer);
 

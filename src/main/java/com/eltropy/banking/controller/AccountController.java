@@ -3,8 +3,10 @@ package com.eltropy.banking.controller;
 import com.eltropy.banking.constants.AccountStatus;
 import com.eltropy.banking.constants.AccountType;
 import com.eltropy.banking.entity.Account;
+import com.eltropy.banking.exceptions.AccountNotFoundException;
 import com.eltropy.banking.exceptions.InvalidAccountTypeException;
 import com.eltropy.banking.repository.AccountRepository;
+import com.eltropy.banking.service.AccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.annotation.PostConstruct;
 import java.net.URI;
-import java.time.Instant;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/account")
@@ -31,55 +26,38 @@ public class AccountController {
     @Autowired
     AccountRepository accountRepository;
 
-    private Set<String> accountTypes = new HashSet<>();
-
-    @PostConstruct
-    public void init(){
-        for (AccountType type : AccountType.values()){
-            accountTypes.add(type.name());
-        }
-    }
+    @Autowired
+    AccountService accountService;
 
     @PostMapping
     public ResponseEntity<Object> createAccount(@RequestBody Account account) {
 
         try {
-            validateInput(account);
+            accountService.validateAccount(account);
         } catch (InvalidAccountTypeException e) {
             logger.info(e.getMessage(), CLASS_NAME);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
-        account.setStatus(AccountStatus.ACTIVE.name());
-        account.setStartDate(Date.from(Instant.now()));
-        Account savedAccount = accountRepository.save(account);
-
+        Account savedAccount = accountService.createAccount(account);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedAccount.getAccountId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
 
-    private boolean validateInput(Account account) throws InvalidAccountTypeException {
-
-        if (! accountTypes.contains(account.getType())) {
-            logger.info("{} is not a valid account type", account.getType());
-            throw new InvalidAccountTypeException(account.getType() + " is not a valid account type");
-        }
-
-        return true;
-    }
-
     @GetMapping("{id}")
     public ResponseEntity<Object> retrieveAccountDetails(@PathVariable long id) {
-        Optional<Account> accountOptional = accountRepository.findById(id);
 
-        if (!accountOptional.isPresent()) {
+        Account account = null;
+        try {
+            account = accountService.getAccount(id);
+        } catch (AccountNotFoundException e) {
             logger.info("No account found with id - {}", id);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
-        return ResponseEntity.ok(accountOptional.get());
+        return ResponseEntity.ok(account);
     }
 
 }

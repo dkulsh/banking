@@ -3,7 +3,9 @@ package com.eltropy.banking.controller;
 import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.constants.UserTypes;
 import com.eltropy.banking.entity.User;
+import com.eltropy.banking.exceptions.InvalidUserTypeException;
 import com.eltropy.banking.repository.UserRepository;
+import com.eltropy.banking.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,29 +29,18 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder bcryptEncoder;
-
-    private Set<String> userTypes = new HashSet<>();
-
-    @PostConstruct
-    public void init(){
-        for (UserTypes type : UserTypes.values()){
-            userTypes.add(type.name());
-        }
-    }
+    UserService userService;
 
     @PostMapping
     public ResponseEntity<Object> createAdmin(@RequestBody User user) {
 
-        if (! userTypes.contains(user.getType())) {
-            logger.error(ErrorConstants.IS_INVALID, user.getType());
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(user.getType() + " is invalid");
+        User savedUser = null;
+        try {
+            savedUser = userService.createUser(user);
+        } catch (InvalidUserTypeException e) {
+            logger.info(ErrorConstants.IS_INVALID, user.getType());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        user.setPassword(bcryptEncoder.encode(user.getPassword()));
-        User savedUser = userRepository.save(user);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedUser.getPk()).toUri();

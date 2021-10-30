@@ -2,6 +2,8 @@ package com.eltropy.banking.constants;
 
 public class ErrorConstants {
 
+    public static final String EMPLOYEE_NOT_FOUND_WITH_ID = "Employee not found with id = {}";
+
     private ErrorConstants() {
     }
 

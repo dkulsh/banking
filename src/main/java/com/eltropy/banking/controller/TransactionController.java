@@ -5,8 +5,13 @@ import com.eltropy.banking.constants.TransactionType;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Transaction;
 import com.eltropy.banking.entity.TransferFunds;
+import com.eltropy.banking.exceptions.AccountNotFoundException;
+import com.eltropy.banking.exceptions.InsufficientBalanceException;
 import com.eltropy.banking.repository.AccountRepository;
 import com.eltropy.banking.repository.TransactionalRepository;
+import com.eltropy.banking.service.AccountService;
+import com.eltropy.banking.service.TransactionService;
+import com.eltropy.banking.util.TransferUtil;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -36,59 +41,48 @@ public class TransactionController {
     private static final Logger logger = LoggerFactory.getLogger(TransactionController.class);
 
     @Autowired
-    AccountRepository accountRepository;
+    TransactionService transactionService;
 
     @Autowired
-    TransactionalRepository transactionalRepository;
+    AccountService accountService;
+
+    @Autowired
+    TransferUtil transferUtil;
 
     @GetMapping("/balance/{id}")
     public ResponseEntity<Object> retrieveBalance(@PathVariable long id) {
-        Optional<Account> accountOptional = accountRepository.findById(id);
 
-        if (!accountOptional.isPresent()) {
-            logger.error(NO_ACCOUNT_FOUND_WITH_ID, id);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + id);
+        Account account = null;
+        try {
+            account = accountService.getAccount(id);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
-        return ResponseEntity.ok("Account Balance is " + accountOptional.get().getAccountBalance());
+        return ResponseEntity.ok("Account Balance is " + account.getAccountBalance());
     }
 
     @PostMapping("/transfer")
     public synchronized ResponseEntity<Object> transferFunds(@RequestBody TransferFunds transferFunds) {
 
-        Optional<Account> fromAccountOptional = accountRepository.findById(transferFunds.getFromAccount());
-        Optional<Account> toAccountOptional = accountRepository.findById(transferFunds.getToAccount());
-
-        if (!fromAccountOptional.isPresent()) {
-            logger.error(NO_ACCOUNT_FOUND_WITH_ID, transferFunds.getFromAccount());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + transferFunds.getFromAccount());
+//        Basic validations. Account valid, sufficient balance etc.
+        try {
+            transferUtil.validateTransaction(transferFunds);
+        } catch (AccountNotFoundException | InsufficientBalanceException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
-        if (!toAccountOptional.isPresent()) {
-            logger.error(NO_ACCOUNT_FOUND_WITH_ID, transferFunds.getFromAccount());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No account found with id - " + transferFunds.getToAccount());
+//        Trigger transfer.
+        List<Account> updatedAccounts = null;
+        try {
+            updatedAccounts = transactionService.transfer(transferFunds);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-
-        if (transferFunds.getAmount() <= fromAccountOptional.get().getAccountBalance()) {
-            List<Account> updatedAccounts = transfer(transferFunds.getAmount(), fromAccountOptional.get(), toAccountOptional.get());
-            return ResponseEntity.ok(updatedAccounts);
-        } else {
-            logger.info("Insufficient balance :: {}", transferFunds.getFromAccount());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Insufficient balance");
-        }
-    }
-
-    @Transactional
-    private List<Account> transfer(long amount, Account fromAccount, Account toAccount){
-
-        fromAccount.setAccountBalance(fromAccount.getAccountBalance() - amount);
-        toAccount.setAccountBalance(toAccount.getAccountBalance() + amount);
-
-        Transaction debit = new Transaction(TransactionType.DEBIT.name(), new Date(), fromAccount.getAccountId(), amount);
-        Transaction credit = new Transaction(TransactionType.CREDIT.name(), new Date(), toAccount.getAccountId(), amount);
-
-        transactionalRepository.saveAll(List.of(debit, credit));
-        return accountRepository.saveAll(List.of(fromAccount, toAccount));
+        return ResponseEntity.ok(updatedAccounts);
     }
 
     @GetMapping(value = "/statement/{accountId}",
@@ -98,46 +92,9 @@ public class TransactionController {
                                                @RequestParam("to") @DateTimeFormat(pattern="yyyy-MM-dd") Date toDate,
                                                HttpServletResponse response) {
 
-        List<Transaction> transactions = transactionalRepository.getTransactions(accountId, fromDate, toDate);
+        List<Transaction> transactions = transactionService.getTransactions(accountId, fromDate, toDate);
 
-        generatePdf(transactions, response);
-
-    }
-
-    private void generatePdf(List<Transaction> transactions, HttpServletResponse response){
-
-        Document document = new Document();
-
-        try {
-
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            PdfWriter.getInstance(document, byteArrayOutputStream);
-
-            //open
-            document.open();
-
-            for (Transaction transaction : transactions) {
-                Paragraph p = new Paragraph();
-                p.add(transaction.toString());
-                p.setAlignment(Element.ALIGN_LEFT);
-                document.add(p);
-                document.add(Chunk.NEWLINE);
-            }
-
-            Font f = new Font();
-            f.setStyle(Font.BOLD);
-            f.setSize(8);
-
-            document.close();
-
-            InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-            IOUtils.copy(inputStream, response.getOutputStream());
-            inputStream.close();
-
-        } catch (DocumentException | IOException e) {
-            logger.error(ErrorConstants.EXCEPTION_WHILE_CREATING_CREATING_STATEMENT_PDF, e.getMessage());
-            e.printStackTrace();
-        }
+        transactionService.generatePdf(transactions, response);
     }
 
 }
