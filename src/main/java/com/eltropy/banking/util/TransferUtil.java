@@ -9,10 +9,10 @@ import com.eltropy.banking.repository.TransactionalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 import static com.eltropy.banking.constants.ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID;
@@ -22,6 +22,9 @@ public class TransferUtil {
 
     public static final String CLASS_NAME = TransferUtil.class.getName();
     private static final Logger logger = LoggerFactory.getLogger(TransferUtil.class);
+
+    @Value("${interest.rate:}")
+    private Float interestRate;
 
     @Autowired
     AccountRepository accountRepository;
@@ -48,6 +51,19 @@ public class TransferUtil {
             logger.info("Insufficient balance :: {}", transferFunds.getFromAccount());
             throw new InsufficientBalanceException("Insufficient balance");
         }
+    }
 
+    @Transactional
+    public void calculateAndIncrement(Account account){
+
+        Optional<Account> accountInProgressOptional = accountRepository.findByIdAndLock(account.getAccountId());
+
+        if (accountInProgressOptional.isEmpty())
+            return;
+
+        Account accountInProgress = accountInProgressOptional.get();
+        Double finalAmount = accountInProgressOptional.get().getAccountBalance() * (1 + (interestRate / 100));
+        accountInProgress.setAccountBalance(finalAmount);
+        accountRepository.save(accountInProgress);
     }
 }

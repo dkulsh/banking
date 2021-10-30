@@ -14,4 +14,6 @@ public interface CustomerService {
     Customer updateCustomer(Customer customer, long id) throws CustomerNotFounException;
 
     Customer linkAccounts(long id, Account account) throws CustomerNotFounException, AccountNotFoundException;
+
+    Customer deleteCustomer(long id) throws CustomerNotFounException;
 }

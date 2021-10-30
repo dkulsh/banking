@@ -17,7 +17,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long accountId;
 
-    private Long accountBalance;
+    private Double accountBalance;
     private String status;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -41,11 +41,11 @@ public class Account {
         this.accountId = accountId;
     }
 
-    public Long getAccountBalance() {
+    public Double getAccountBalance() {
         return accountBalance;
     }
 
-    public void setAccountBalance(Long accountBalance) {
+    public void setAccountBalance(Double accountBalance) {
         this.accountBalance = accountBalance;
     }
 

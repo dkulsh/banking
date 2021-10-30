@@ -2,15 +2,15 @@ package com.eltropy.banking.entity;
 
 public class TransferFunds {
 
-    private long amount;
+    private double amount;
     private Long fromAccount;
     private Long toAccount;
 
-    public long getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(long amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 

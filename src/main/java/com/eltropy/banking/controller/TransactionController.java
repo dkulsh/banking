@@ -1,20 +1,14 @@
 package com.eltropy.banking.controller;
 
-import com.eltropy.banking.constants.ErrorConstants;
-import com.eltropy.banking.constants.TransactionType;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Transaction;
 import com.eltropy.banking.entity.TransferFunds;
 import com.eltropy.banking.exceptions.AccountNotFoundException;
 import com.eltropy.banking.exceptions.InsufficientBalanceException;
-import com.eltropy.banking.repository.AccountRepository;
-import com.eltropy.banking.repository.TransactionalRepository;
+import com.eltropy.banking.scheduler.InterestScheduler;
 import com.eltropy.banking.service.AccountService;
 import com.eltropy.banking.service.TransactionService;
 import com.eltropy.banking.util.TransferUtil;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
-import java.io.*;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
-import static com.eltropy.banking.constants.ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID;
 
 @RestController
 @RequestMapping("/transaction")
@@ -49,8 +38,11 @@ public class TransactionController {
     @Autowired
     TransferUtil transferUtil;
 
+    @Autowired
+    InterestScheduler interestScheduler;
+
     @GetMapping("/balance/{id}")
-    public ResponseEntity<Object> retrieveBalance(@PathVariable long id) {
+    public ResponseEntity<String> retrieveBalance(@PathVariable long id) {
 
         Account account = null;
         try {
@@ -64,7 +56,7 @@ public class TransactionController {
     }
 
     @PostMapping("/transfer")
-    public synchronized ResponseEntity<Object> transferFunds(@RequestBody TransferFunds transferFunds) {
+    public ResponseEntity<Object> transferFunds(@RequestBody TransferFunds transferFunds) {
 
 //        Basic validations. Account valid, sufficient balance etc.
         try {
@@ -97,4 +89,10 @@ public class TransactionController {
         transactionService.generatePdf(transactions, response);
     }
 
+    @GetMapping("/triggerInterest")
+    public ResponseEntity<Object> calculateInterest(){
+
+        interestScheduler.addInterest();
+        return ResponseEntity.ok().build();
+    }
 }

@@ -2,18 +2,15 @@ package com.eltropy.banking.scheduler;
 
 import com.eltropy.banking.constants.AccountStatus;
 import com.eltropy.banking.constants.ErrorConstants;
-import com.eltropy.banking.controller.AccountController;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.repository.AccountRepository;
+import com.eltropy.banking.util.TransferUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-
 import java.util.List;
 
 @Configuration
@@ -26,8 +23,8 @@ public class InterestScheduler {
     @Autowired
     AccountRepository accountRepository;
 
-    @Value("${interest.rate:}")
-    private Float interestRate;
+    @Autowired
+    TransferUtil transferUtil;
 
 //    Defaulted to run once in January
     @Scheduled(cron = "${interest.rate.calculation.cron:1 1 1 1 1 1}")
@@ -37,12 +34,11 @@ public class InterestScheduler {
 
         List<Account> accountList = accountRepository.findAllByStatus(AccountStatus.ACTIVE.name());
         for (Account account: accountList) {
-
-            Long finalAmount = account.getAccountBalance() * (1 + (interestRate.longValue()/100));
-            account.setAccountBalance(finalAmount);
-            accountRepository.save(account);
+            transferUtil.calculateAndIncrement(account);
         }
 
         logger.info(ErrorConstants.INTEREST_CALCULATION_COMPLETED, CLASS_NAME);
     }
+
+
 }

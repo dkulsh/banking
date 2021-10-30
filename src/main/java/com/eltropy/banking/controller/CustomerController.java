@@ -1,6 +1,5 @@
 package com.eltropy.banking.controller;
 
-import com.eltropy.banking.constants.CustomerStatus;
 import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Customer;
@@ -18,9 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
-
-import static com.eltropy.banking.constants.ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID;
 
 @RestController
 @RequestMapping("/customer")
@@ -79,8 +75,16 @@ public class CustomerController {
     }
 
     @DeleteMapping("{id}")
-    public void deleteCustomer(@PathVariable long id) {
-        customerRepository.deleteById(id);
+    public ResponseEntity<Object> deleteCustomer(@PathVariable long id) {
+
+        try {
+            customerService.deleteCustomer(id);
+        } catch (CustomerNotFounException e) {
+            logger.info(ErrorConstants.EMPLOYEE_NOT_FOUND_WITH_ID, id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
+        return new ResponseEntity<>(id, HttpStatus.ACCEPTED);
     }
 
 

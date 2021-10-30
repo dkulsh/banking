@@ -17,12 +17,12 @@ public class Transaction {
 
     private Long accountId;
 
-    private Long amount;
+    private Double amount;
 
     public Transaction() {
     }
 
-    public Transaction(String type, Date transferDate, Long accountId, Long amount) {
+    public Transaction(String type, Date transferDate, Long accountId, Double amount) {
         this.type = type;
         this.transferDate = transferDate;
         this.accountId = accountId;
@@ -61,11 +61,11 @@ public class Transaction {
         this.accountId = accountId;
     }
 
-    public Long getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(Double amount) {
         this.amount = amount;
     }
 

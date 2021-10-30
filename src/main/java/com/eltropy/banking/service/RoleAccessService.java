@@ -27,8 +27,9 @@ public class RoleAccessService {
         RoleAccess roleAccess1 = new RoleAccess(UserTypes.ADMIN.name(), "employee");
         RoleAccess roleAccess2 = new RoleAccess(UserTypes.EMPLOYEE.name(), "customer");
         RoleAccess roleAccess3 = new RoleAccess(UserTypes.EMPLOYEE.name(), "account");
+        RoleAccess roleAccess4 = new RoleAccess(UserTypes.EMPLOYEE.name(), "transaction");
 
-        roleAccessRepository.saveAll(List.of(roleAccess1, roleAccess2, roleAccess3));
+        roleAccessRepository.saveAll(List.of(roleAccess1, roleAccess2, roleAccess3, roleAccess4));
         refresh();
     }
 

@@ -2,7 +2,6 @@ package com.eltropy.banking.service;
 
 import com.eltropy.banking.constants.CustomerStatus;
 import com.eltropy.banking.constants.ErrorConstants;
-import com.eltropy.banking.controller.CustomerController;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Customer;
 import com.eltropy.banking.exceptions.AccountNotFoundException;
@@ -12,8 +11,6 @@ import com.eltropy.banking.repository.CustomerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -83,6 +80,23 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = customerOptional.get();
         Account dbAccount = accountOptional.get();
         customer.getAccounts().add(dbAccount);
+        return customerRepository.save(customer);
+
+    }
+
+    @Override
+    public Customer deleteCustomer(long id) throws CustomerNotFounException {
+
+        Optional<Customer> customerOptional = customerRepository.findById(id);
+
+        if (customerOptional.isEmpty()) {
+            logger.info(ErrorConstants.NO_CUSTOMER_FOUND_WITH_ID, id);
+            throw new CustomerNotFounException("Customer not found with id = " + id);
+        }
+
+        Customer customer = customerOptional.get();
+        customer.setStatus(CustomerStatus.DELETED.name());
+
         return customerRepository.save(customer);
 
     }
