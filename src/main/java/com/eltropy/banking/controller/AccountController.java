@@ -30,6 +30,7 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<Object> createAccount(@RequestBody Account account) {
 
+//        Validate data
         try {
             accountService.validateAccount(account);
         } catch (InvalidAccountTypeException e) {
@@ -37,6 +38,7 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
+//        If valid. Then create account and return URI
         Account savedAccount = accountService.createAccount(account);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedAccount.getAccountId()).toUri();

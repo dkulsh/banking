@@ -27,12 +27,12 @@ public class JwtTokenUtil implements Serializable {
     @Autowired
     RoleAccessService roleAccessService;
 
-    //retrieve username from jwt token
+//    Read user details
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    //retrieve expiration date from jwt token
+//    Fetch token expiry
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
@@ -41,18 +41,19 @@ public class JwtTokenUtil implements Serializable {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
-    //for retrieveing any information from token we will need the secret key
+
+//    Get all info from token. Will be returned as map
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
-    //check if the token has expired
+//    Check token expiry
     private Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
 
-    //generate token for user
+//    Generate token
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
@@ -61,11 +62,10 @@ public class JwtTokenUtil implements Serializable {
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
-    //while creating the token -
-    //1. Define  claims of the token, like Issuer, Expiration, Subject, and the ID
-    //2. Sign the JWT using the HS512 algorithm and secret key.
-    //3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
-    //   compaction of the JWT to a URL-safe string
+//    Create token.
+//    Add details like issuer, expiry, user, id
+//    Sign with chosen algorithm and a secret key
+//    Compact method needs to be called
     private String doGenerateToken(Map<String, Object> claims, String subject) {
 
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
@@ -76,12 +76,18 @@ public class JwtTokenUtil implements Serializable {
     //validate token
     public Boolean validateToken(String token, UserDetails userDetails, HttpServletRequest request) {
         final String username = getUsernameFromToken(token);
+
+//        Claims is a Map of strings. In this case has the roles
         Claims claims = getAllClaimsFromToken(token);
 
+//        Use the role in the Claim to get all access the user has
         List<String> accessesForRole = roleAccessService.getRolesToAccessMap().get(claims.get(ROLE, String.class));
         String accessRequested = request.getServletPath().split("/")[1];
+
+//        If the user does NOT have access based on token, then refuse access
         if (! accessesForRole.contains(accessRequested)) { return Boolean.FALSE; }
 
+//        All looks good. Allow access
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

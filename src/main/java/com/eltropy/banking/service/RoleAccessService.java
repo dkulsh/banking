@@ -24,6 +24,7 @@ public class RoleAccessService {
     @PostConstruct
     public void init(){
 
+//        Pre-defined roles in the system. These can be changed on runtime from the DB and a refresh call
         RoleAccess roleAccess1 = new RoleAccess(UserTypes.ADMIN.name(), "employee");
         RoleAccess roleAccess2 = new RoleAccess(UserTypes.EMPLOYEE.name(), "customer");
         RoleAccess roleAccess3 = new RoleAccess(UserTypes.EMPLOYEE.name(), "account");

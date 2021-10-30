@@ -25,6 +25,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
+//        Spring security class to get user
         com.eltropy.banking.entity.User localuser = userRepository.findByUsername(username);
         if (localuser != null) {
             return new User(localuser.getUsername(), localuser.getPassword(), List.of((GrantedAuthority) localuser::getType));

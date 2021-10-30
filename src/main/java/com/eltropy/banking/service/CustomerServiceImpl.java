@@ -98,6 +98,5 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setStatus(CustomerStatus.DELETED.name());
 
         return customerRepository.save(customer);
-
     }
 }

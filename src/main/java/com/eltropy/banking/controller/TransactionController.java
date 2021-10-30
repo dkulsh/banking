@@ -84,14 +84,17 @@ public class TransactionController {
                                                @RequestParam("to") @DateTimeFormat(pattern="yyyy-MM-dd") Date toDate,
                                                HttpServletResponse response) {
 
+//        Fetch all transactions for the duration
         List<Transaction> transactions = transactionService.getTransactions(accountId, fromDate, toDate);
 
+//        Trigger pdf generation. Set the pdf on the response
         transactionService.generatePdf(transactions, response);
     }
 
     @GetMapping("/triggerInterest")
     public ResponseEntity<Object> calculateInterest(){
 
+//        Adhoc endpoint to trigger interest calculation
         interestScheduler.addInterest();
         return ResponseEntity.ok().build();
     }

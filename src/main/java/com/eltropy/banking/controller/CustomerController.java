@@ -5,8 +5,6 @@ import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.entity.Customer;
 import com.eltropy.banking.exceptions.AccountNotFoundException;
 import com.eltropy.banking.exceptions.CustomerNotFounException;
-import com.eltropy.banking.repository.AccountRepository;
-import com.eltropy.banking.repository.CustomerRepository;
 import com.eltropy.banking.service.CustomerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +24,7 @@ public class CustomerController {
     private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
     @Autowired
-    CustomerRepository customerRepository;
-
-    @Autowired
     CustomerService customerService;
-
-    @Autowired
-    AccountRepository accountRepository;
 
     @GetMapping("{id}")
     public ResponseEntity<Object> retrieveCustomer(@PathVariable long id) {
@@ -60,7 +52,7 @@ public class CustomerController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> updatePhoneDetails(@RequestBody Customer customer, @PathVariable long id) {
+    public ResponseEntity<Object> updateCustomer(@RequestBody Customer customer, @PathVariable long id) {
 
         Customer savedCustomer = null;
 

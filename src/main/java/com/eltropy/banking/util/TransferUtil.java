@@ -56,6 +56,7 @@ public class TransferUtil {
     @Transactional
     public void calculateAndIncrement(Account account){
 
+//        Transactional and lock on DB ensures the account is not disturbed by other requests
         Optional<Account> accountInProgressOptional = accountRepository.findByIdAndLock(account.getAccountId());
 
         if (accountInProgressOptional.isEmpty())

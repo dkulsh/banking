@@ -23,6 +23,7 @@ public class RoleAccessController {
     @GetMapping("/refresh")
     public ResponseEntity retrieveAccountDetails() {
 
+//        Refresh all the role access data from DB
         roleAccessService.refresh();
         logger.info(ErrorConstants.ROLE_TO_ACCESS_REFRESH_TRIGERRED);
         return ResponseEntity.ok().build();

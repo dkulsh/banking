@@ -40,8 +40,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String username = null;
         String jwtToken = null;
-        // JWT Token is in the form "Bearer token". Remove Bearer word and get
-        // only the Token
+
+        // JWT Token is in the form "Bearer token". Remove Bearer word
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
             try {
@@ -55,13 +55,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             loggerVar.warn(ErrorConstants.NOT_BEGIN_WITH_BEARER_STRING, CLASS_NAME);
         }
 
-        // Once we get the token validate it.
+        // Token received. Validate it
         if (username != null
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
 
+//            Get user with his roles
             UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
 
-            // if token is valid configure Spring Security to manually set
+            // Validate token.
+            // If valid configure Spring Security to manually set
             // authentication
             if (jwtTokenUtil.validateToken(jwtToken, userDetails, request)) {
 

@@ -3,7 +3,6 @@ package com.eltropy.banking.controller;
 import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.entity.Employee;
 import com.eltropy.banking.exceptions.EmployeeNotFoundException;
-import com.eltropy.banking.repository.EmployeeRepository;
 import com.eltropy.banking.service.EmployeeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +19,6 @@ public class EmployeeController {
 
     public static final String CLASS_NAME = EmployeeController.class.getName();
     private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
-
-    @Autowired
-    EmployeeRepository employeeRepository;
 
     @Autowired
     EmployeeService employeeService;

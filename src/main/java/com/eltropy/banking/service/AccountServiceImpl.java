@@ -28,6 +28,7 @@ public class AccountServiceImpl implements AccountService{
 
     private Set<String> accountTypes = new HashSet<>();
 
+//    Read all account types in the memory
     @PostConstruct
     public void init(){
         for (AccountType type : AccountType.values()){

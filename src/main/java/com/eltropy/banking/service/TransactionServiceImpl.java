@@ -38,6 +38,8 @@ public class TransactionServiceImpl implements TransactionService{
     @Transactional
     public List<Account> transfer(TransferFunds transferFunds) throws InsufficientBalanceException {
 
+//        Method is transactional and takes a lock on the DB rows.
+//        Multiple transfers can happen until they don't involve the same account
         Account fromAccount = accountRepository.findByIdAndLock(transferFunds.getFromAccount()).get();
         Account toAccount = accountRepository.findByIdAndLock(transferFunds.getToAccount()).get();
 

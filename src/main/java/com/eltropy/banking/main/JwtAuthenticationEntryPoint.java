@@ -17,6 +17,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
     public static final String CLASS_NAME = JwtAuthenticationEntryPoint.class.getName();
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationEntryPoint.class);
 
+//    Spring security class to respond to a failed credential validation
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
