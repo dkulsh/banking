@@ -1,24 +1,17 @@
 package com.eltropy.banking.controller;
 
 import com.eltropy.banking.constants.ErrorConstants;
-import com.eltropy.banking.constants.UserTypes;
 import com.eltropy.banking.entity.User;
 import com.eltropy.banking.exceptions.InvalidUserTypeException;
-import com.eltropy.banking.repository.UserRepository;
 import com.eltropy.banking.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.annotation.PostConstruct;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/user")

@@ -2,7 +2,6 @@ package com.eltropy.banking.service;
 
 import com.eltropy.banking.constants.AccountStatus;
 import com.eltropy.banking.constants.AccountType;
-import com.eltropy.banking.controller.AccountController;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.exceptions.AccountNotFoundException;
 import com.eltropy.banking.exceptions.InvalidAccountTypeException;
@@ -10,10 +9,7 @@ import com.eltropy.banking.repository.AccountRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.util.Date;

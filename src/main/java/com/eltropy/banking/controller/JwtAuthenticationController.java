@@ -40,7 +40,6 @@ public class JwtAuthenticationController {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (BadCredentialsException e) {
-//            logger.error("INVALID_CREDENTIALS : User: {} and Password {}", username, password);
 //            Do NOT print password
             throw new Exception("INVALID_CREDENTIALS", e);
         }

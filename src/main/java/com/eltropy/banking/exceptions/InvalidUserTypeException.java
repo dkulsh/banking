@@ -2,7 +2,7 @@ package com.eltropy.banking.exceptions;
 
 public class InvalidUserTypeException extends Exception{
 
-    private String message;
+    private final String message;
 
     public InvalidUserTypeException(String message) {
         super(message);

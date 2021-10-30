@@ -2,7 +2,7 @@ package com.eltropy.banking.exceptions;
 
 public class CustomerNotFounException extends Exception{
 
-    private String message;
+    private final String message;
 
     public CustomerNotFounException(String message) {
         super(message);

@@ -1,6 +1,5 @@
 package com.eltropy.banking.controller;
 
-import com.eltropy.banking.constants.EmployeeStatus;
 import com.eltropy.banking.constants.ErrorConstants;
 import com.eltropy.banking.entity.Employee;
 import com.eltropy.banking.exceptions.EmployeeNotFoundException;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/employee")

@@ -1,7 +1,5 @@
 package com.eltropy.banking.controller;
 
-import com.eltropy.banking.constants.AccountStatus;
-import com.eltropy.banking.constants.AccountType;
 import com.eltropy.banking.entity.Account;
 import com.eltropy.banking.exceptions.AccountNotFoundException;
 import com.eltropy.banking.exceptions.InvalidAccountTypeException;

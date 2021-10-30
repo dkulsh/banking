@@ -2,7 +2,7 @@ package com.eltropy.banking.exceptions;
 
 public class AccountNotFoundException extends Exception{
 
-    private String message;
+    private final String message;
 
     public AccountNotFoundException(String message) {
         super(message);

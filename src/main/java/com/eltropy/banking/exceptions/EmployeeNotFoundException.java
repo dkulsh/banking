@@ -2,7 +2,7 @@ package com.eltropy.banking.exceptions;
 
 public class EmployeeNotFoundException extends Exception{
 
-    private String message;
+    private final String message;
 
     public EmployeeNotFoundException(String message) {
         super(message);

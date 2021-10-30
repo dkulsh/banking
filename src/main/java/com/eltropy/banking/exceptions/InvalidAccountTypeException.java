@@ -2,7 +2,7 @@ package com.eltropy.banking.exceptions;
 
 public class InvalidAccountTypeException extends Exception{
 
-    private String message;
+    private final String message;
 
     public InvalidAccountTypeException(String message) {
         super(message);
