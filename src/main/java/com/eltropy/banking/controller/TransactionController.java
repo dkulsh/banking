@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -86,6 +87,16 @@ public class TransactionController {
 
 //        Fetch all transactions for the duration
         List<Transaction> transactions = transactionService.getTransactions(accountId, fromDate, toDate);
+
+        if (transactions.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            try {
+                response.getWriter().write("No transactions on the account");
+                return;
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+        }
 
 //        Trigger pdf generation. Set the pdf on the response
         transactionService.generatePdf(transactions, response);
