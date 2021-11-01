@@ -17,6 +17,8 @@ public class Employee {
     private String department;
 
     private String status;
+    private Long userId;
+    private String userName;
 
     public String getStatus() {
         return status;
@@ -56,5 +58,21 @@ public class Employee {
 
     public void setDepartment(String department) {
         this.department = department;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

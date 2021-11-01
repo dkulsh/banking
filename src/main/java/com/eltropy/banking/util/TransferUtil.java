@@ -1,6 +1,8 @@
 package com.eltropy.banking.util;
 
+import com.eltropy.banking.constants.TransactionType;
 import com.eltropy.banking.entity.Account;
+import com.eltropy.banking.entity.Transaction;
 import com.eltropy.banking.entity.TransferFunds;
 import com.eltropy.banking.exceptions.AccountNotFoundException;
 import com.eltropy.banking.exceptions.InsufficientBalanceException;
@@ -13,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static com.eltropy.banking.constants.ErrorConstants.NO_ACCOUNT_FOUND_WITH_ID;
@@ -64,7 +68,12 @@ public class TransferUtil {
 
         Account accountInProgress = accountInProgressOptional.get();
         Double finalAmount = accountInProgressOptional.get().getAccountBalance() * (1 + (interestRate / 100));
+        Double interestAmount = finalAmount - accountInProgress.getAccountBalance();
         accountInProgress.setAccountBalance(finalAmount);
+
+        Transaction credit = new Transaction(TransactionType.CREDIT.name(), new Date(), accountInProgress.getAccountId(), interestAmount);
+
+        transactionalRepository.save(credit);
         accountRepository.save(accountInProgress);
     }
 }

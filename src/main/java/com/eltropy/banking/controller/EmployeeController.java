@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
@@ -26,7 +27,14 @@ public class EmployeeController {
     @PostMapping
     public ResponseEntity<Object> createEmployee(@RequestBody Employee employee) {
 
-        Employee savedEmployee = employeeService.createEmployee(employee);
+        Employee savedEmployee = null;
+
+        try {
+            savedEmployee = employeeService.createEmployee(employee);
+        } catch (UsernameNotFoundException e) {
+            logger.info(ErrorConstants.NOT_FOUND_WITH_USERNAME, employee.getUserName());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedEmployee.getEmployeId()).toUri();
